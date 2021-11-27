@@ -38,8 +38,3 @@ D = 'D={(q0,C,'+'{q1,'+primerEstadoTotal[:-1]+'}),(q1,H,{q201}),(q201,4,{q301}),
 F = 'F={q301,'+estadosFinales[:-1]+'}'
 S = 'S={C,H'+numerosTotal+'}'
 Q = 'Q={'+totalEstados[:-1]+'}'
-
-
-print(D)
-print('-------------------------------------')
-print(F)

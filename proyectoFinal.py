@@ -1,5 +1,6 @@
 import re
-from datos import Q,S,F,D
+import tkinter as tk
+from datosAutomata import Q,S,F,D
 from datosMaquina import datos
 q0 = 'q0={q0}'
 #Automata
@@ -22,11 +23,11 @@ def verificacionLlaves(cadena):
     
  
     if tipoDeAutomata == 'AFND':
-        print('soy AFND')
+   
         resultado = AFND(conexiones3(D),cadena)
        
     elif tipoDeAutomata == 'AFD':
-        print('soy AFD')
+        
         resultado = AFND(conexiones(D),cadena)
     return  resultado   
    
@@ -226,8 +227,15 @@ def conversionEntrada(ecuacion):
     respuesta = verificacionLlaves(entradaFinal)
     return respuesta
 
-
-
+def automata(formula):
+    respuesta = conversionEntrada(formula)
+    if respuesta == 'Valida': 
+        # maquina(formula)
+        return True
+    elif respuesta == 'Invalida':
+         return False
+         
+#expresion regular
 def expresionRegular(formula):
     respuesta = 'Invalido'
     p = re.compile('([C]|[C]([1-9]|[0-9]{2,3}))[H]([1-9]{,2}[02468]|[1-9][02468]{,2})')
@@ -235,21 +243,14 @@ def expresionRegular(formula):
     valor = p.fullmatch(formula)
     
     if valor is not None:
-        print('BIEN EXPRESION')
-        automata(formula)
+        # print('BIEN EXPRESION')
+        # automata(formula)
+        return True
         
     elif valor is None:
-        print('ERROR EXPRESION')
+        return False
     
-        
-def automata(formula):
-    respuesta = conversionEntrada(formula)
-    if respuesta == 'Valida':
-        print('Automata Bien')
-        maquina(formula)
-    elif respuesta == 'Invalida':
-         print('Automata mal')
-    
+#maquina de turing
 def llenadoDatos():
     datosNuevos = datos.replace(' ','')
     # print(datosNuevos)
@@ -285,8 +286,6 @@ def llenadoDatos():
             transicionesLlegada.append(i)
             bandera = False
             
-    # print(transicionesIda)
-    # print(transicionesLlegada)
     return transicionesIda,transicionesLlegada 
 
 def llenarCinta(entrada):
@@ -299,7 +298,7 @@ def llenarCinta(entrada):
             break
     nuevaEntrada = entradaAux + 'H'
     
-    print(nuevaEntrada)
+   
   
     for i in nuevaEntrada:
         cinta.append(i)
@@ -317,17 +316,14 @@ def maquina(entrada):
     cabezal = 'a00'
     cinta = llenarCinta(entrada)
     banderaMaquina =True
-    # print('entrada cinta: ',cinta)
-    # print('a')
+    
     while(banderaMaquina == True):
       
         for i in range(len(transicionesIda)):
             if(cabezal == transicionesIda[i][0] and cinta[contadorCinta] == transicionesIda[i][1]):
-                
-                # print(transicionesIda[i][0])
-                # print(transicionesIda[i][1])
+             
                 cabezal = transicionesLlegada[i][0]
-                # print('nuevo cabezal: ',cabezal)
+             
                 cinta[contadorCinta] = transicionesLlegada[i][1]
            
                 if transicionesLlegada[i][2] == 'R':
@@ -335,10 +331,9 @@ def maquina(entrada):
                     contadorCinta +=1
                 elif transicionesLlegada[i][2] == 'S':
                     banderaMaquina = False
-                
-                # print('proximo valor a encontrar: ',cinta[contadorCinta])
+             
                 break
-    print(cinta) 
+ 
           
    
  
@@ -347,8 +342,57 @@ def maquina(entrada):
         if i != '1' and i != '2' and i != '3' and i != '4'and i != '5'and i != '6'and i != '7'and i != '8'and i != '9'and i != '0' and i != 'H' and i != 'B': 
             respuestaFinal = respuestaFinal + i
     res = respuestaFinal + 'no'
-    print(res)
- 
     
+    return res
+      
+def resultadoFinal(formula):
+    respuestaFinal = 'Formula Invalida'
+    expresion = expresionRegular(formula)
+    if(expresion == True):
+        automataFND = automata(formula)
+        if (automataFND == True):
+            nombreCadena =  maquina(formula)
+            respuestaFinal = nombreCadena
+        elif automataFND == False:
+            respuestaFinal =  'Formula Invalida'
+    elif expresionRegular == False:
+        respuestaFinal = 'Formula Invalida'
+    return respuestaFinal
+   
+def ventana():
+    root= tk.Tk()
+    canvas1 = tk.Canvas(root, width = 610, height = 400)
+    canvas1.config(bg='white')
+    canvas1.pack()
+
+    label1 = tk.Label(root, text='Alcanos a nombre de cadena recta')
+    label1.config(font=('helvetica', 22),bg='white',fg='#17202A')
+    canvas1.create_window(305, 25, window=label1)
+
+    label2 = tk.Label(root, text='Ingrese su formula Molecular')
+    label2.config(font=('helvetica', 18),bg='white',fg='#2C3E50')
+    canvas1.create_window(300, 100, window=label2)
+
+    entry1 = tk.Entry (root) 
+    entry1.config(width=10,font=('helvetica', 15),bg='#D5D8DC')
+    canvas1.create_window(300, 140, window=entry1)
+
+    label3 = tk.Label(root, text= 'Nombre de cadena recta: ')
+    label3.config(bg='white',font=('helvetica',16),fg='#1C2833')
+    canvas1.create_window(300, 230, window=label3)
+
+
+    def boton():  
+        cadena = entry1.get()
+        if resultadoFinal(cadena) == 'Formula Invalida':
+            label3.config(text='Error: '+resultadoFinal(cadena),fg='red')
+        else:
+            label3.config(text='Nombre de cadena recta: '+resultadoFinal(cadena),fg='#1C2833')
     
-expresionRegular('C61H124')
+    button1 = tk.Button(text='Validar Formula', command=boton,bg='#2C3E50', fg='#D5D8DC')
+    button1.config(width=12,height=1,font=('helvetica',11))
+    canvas1.create_window(300, 180, window=button1)
+
+    root.mainloop()    
+    
+ventana()
